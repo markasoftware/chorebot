@@ -1,4 +1,11 @@
-* Mathematical Description
+This is the script I use/used to generate a fair chore schedule with my housemates from 2022-2023.
+It's very ad-hoc.
+
+First load ~ours.lisp~. Then run ~step-2~ in ~solver.lisp~, passing the appropriate arguments set to
+variables in ~ours.lisp~. Then, ~to-csv~ can be used to get a csv to import to google sheets or
+elsewhere.
+
+* COMMENT Mathematical Description
   What does an ideal chore schedule look like? Let /n/ be the number of people. Let /c/ be the
   number of chores. Let $k(t)$ be the number of chores performed through the /t/-th day, starting
   from 1. Let $\Delta(i)$ be the time between performing the $i-1$-th chore and the /i/-th chore.
@@ -186,7 +193,7 @@
   number of days. When the tasks did not occur on the same day, it will just be 1/n where /n/ is the
   spacing between the events, otherwise it will be /n/ where /n/ is the number of times the task was
   performed on that day.
-* Experiments
+* COMMENT Experiments
   #+BEGIN_SRC lisp
     (defun wave-cycles (freq)
       "If on cycle 0 the wave peak occurs at an integer, then cycle (wave-cycles freq) is the earliest
@@ -211,17 +218,17 @@
     (defun vector-add (&rest vs)
       (apply #'mapcar #'+ vs))
   #+END_SRC
-* As a matrix rounding problem.
+* COMMENT As a matrix rounding problem.
   A t*n*d matrix, each item is the frequency that agent has to perform task. Goal is to round,
   preserving sum along d axis (number of tasks), preserving sum along n axis (only 1 person should
   do each task every day), and not necessarily preserving sum along t axis.
 
   doesn't really work.
-* As maxflow
+* COMMENT As maxflow
   First, note that there are (hopefully) algorithms for solving maxflow with a) colored
 
   For each day, create a node at the "beginning" of each chore and at the end.
-* The Solution!
+* COMMENT The Solution!
   The problem can be divided into two steps:
 ** Which days people have tasks
    The easiest way to do this is to create 0-1 waves for everybody based on their frequency. Set

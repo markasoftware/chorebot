@@ -24,7 +24,7 @@
 (defparameter *waves*
   (list* (wave-peak-ones 1/4 3 56) (loop for i from 0 below 7 collect (wave-peak-ones 22/56 (* i 11/30) 56))))
 
-(defparameter *everybody* '(zander armand ben bruno calvin jason mark nabil))
+(defparameter *everybody* '(zander armand ben bruno calvin jason mark trent))
 (defparameter *almost-everybody* (remove 'zander *everybody*))
 
 (defparameter *chore-people* `((cleaning ,@*everybody*)
@@ -32,4 +32,9 @@
                                (garbage ,@*everybody*)))
 
 (defparameter *people-days* (mapcar #'cons *everybody* *waves*))
+
+(defparameter *distinguished-days* `((garbage . ,(loop for day from 0 below 56 by 7
+                                                       append (if (< (1+ day) 56)
+                                                                  (list day (1+ day))
+                                                                  (list day))))))
 
