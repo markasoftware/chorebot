@@ -1,0 +1,303 @@
+* Mathematical Description
+  What does an ideal chore schedule look like? Let /n/ be the number of people. Let /c/ be the
+  number of chores. Let $k(t)$ be the number of chores performed through the /t/-th day, starting
+  from 1. Let $\Delta(i)$ be the time between performing the $i-1$-th chore and the /i/-th chore.
+  Our goals are:
+  + A person does every chore once before doing the first one again.
+  + $\lim_{m\to\infty} \frac{\sum_{i=1}^m\Delta(i)}{m}=\frac{c}{n}$. In English, the average spacing
+    between chores approaches the obvious value.
+  + $\Delta(i)\in \{\lfloor c/n \rfloor, \lceil c/n \rceil\}$ for all /i/. I.e., the spacing between
+    any two chores should be one of the integers closest to the limiting value.
+
+  These goals are fairly easy to satisfy when everybody has to do all the different chores. We
+  simply enumerate everybody, then have the first listed person do task 1, the second listed person
+  do task 2, the third listed person do task 3, the fourth listed person do task 1, the /i/-th
+  listed person do task $(i\ \text{mod}\ 3)+1$.
+
+  The situation is more complicated when we do not require everybody to perform all tasks.
+
+  + Let $S_i$ be the set of tasks that person /i/ must perform.
+  + Let /n/ be the number of people.
+  + Let the /total task-people/ of the schedule be $\sum_i|S_i|$.
+  + Let $f_i$ be the /frequency/ of person /i/, defined as $|\bigcup_j S_j|\frac{|S_i|}{\sum_i|S_i|}$; this is how
+    many times per day, in the limit, that the person should have to perform the given task. (The
+    fraction is the portion of tasks they should perform, and $|\bigcup_j S_j|$ is the number of tasks
+    each day). When everyone has the same number of tasks, this reduces to $\frac{|S|}{n}$, which is reasonable.
+  + Let $p_i=\frac{1}{f_i}$ be the /period/ of person /i/, the number of days between their chores
+    on average.
+  + Let $t_i(k)$ be the day when person /i/ is assigned to perform their /k/-th overall task in the
+    schedule.
+  + Let $\Delta_i(k)=t_i(k)-t_i(k-1)$, the gap the person gets between two consecutive chores.
+  + Let $c_i(t)$ be the number of chores person /i/ completed through day /t/.
+
+  Our goals are, in order of importance:
+  1. $\lim_{m\to\infty} \frac{\sum_{k=1}^m \Delta_i(k)}{m}=p_i$ for all people /i/. In English, over
+     a long period of time, the average gap each person gets between two consecutive chores
+     approaches the fair value. This is equivalent to $\lim_{t\to\infty} \frac{c_i(t)}{t}=f_i$
+     because
+
+     $$\lim_{m\to\infty} \frac{\sum_{k=1}^m \Delta_i(k)}{m}=\lim_{t\to\infty}
+     \frac{t_i(c_i(t))}{c_i(t)}=\lim_{t\to\infty} \frac{t}{c_i(t)}=\frac{1}{f_i}$$
+
+     (Because $t_i(c_i(t))$ should be within $\lceil p_i\rceil$, a constant, of /t/).
+  2. $\Delta_i(k)\in \{\lfloor p_i\rfloor,\lceil p_i\rceil\}$ for all /i/ and /k/. In English, the
+     gap between any person has between any two consecutive chores is one of the integers closest to
+     the fair value.
+  3. After person /i/ does a task /x/, they do all other tasks once before doing /x/ again.
+
+  Things are simpler when all $S_i$ are equal (which implies all $p_i$ equal too).
+
+  Example schedules that work, where each $S_i$ is equal:
+  + Three people, three tasks. They rotate tasks every day.
+  + Three people, two tasks. Fill out the table left to right, top to bottom with A, B, and C.
+    You'll notice that it works out. Notice that this same strategy wouldn't have worked for three
+    and three!
+  + Three people, four tasks. Use the same strategy as three people, two tasks, and it works out.
+  + Six people, three tasks: You'll end up with two groups of three people alternating, but each
+    time the same group comes up you need to change its order.
+  + Six people, four tasks: Some periodicity shows up, you need to sometimes switch people around
+    within a row.
+
+  What's a general strategy? Ideas:
+  + Pick people in enumeration order, reorder within rows as necessary to preserve condition 3.
+    - Satisfies 1 and 2.
+    - Not clear that reordering to preserve 3 is always possible.
+      * If $g=\gcd(n, |S|)=1$, then no reordering is necessary.
+      * Else, groups of size /g/ will move around in some periodic fashion, and we also reorder
+        cyclically inside of those groups for every group cycle. This is the solution for constant $|S|$.
+  + Pick a person who's eligible for the role according to rule 2, and has not performed it for
+    the longest period of time.
+    - Satisfies 2 and probably 3.
+    - Not obvious that it preserves condition 1, but seems that it does?
+  + Pick a person who's eligible for the role according to rules 2 and 3, and whose
+    $f_i-\frac{c_i(t)}{t}$  is the largest (i.e., they need to catch up on chores the most).
+    - Satisfies rules 2 and 3. Probably satisfies rule 1, but it's possible that they won't be
+      selected often enough to satisfy rule 1.
+    - Unclear that there will always be a person to select.
+
+
+  When $n=|S_i|$, the answer must be to enumerate the people and do that as a cycle.
+
+  When some people don't have some tasks, can we possibly reduce to the simpler problem? Probably
+  not...
+
+  Can enumerating and swapping be generalized?
+
+  Imagine that there are 100 people and two tasks. Person A performs both tasks. Everybody else just
+  performs task 2. Person A has to perform task 1 always. All three conditions are violated.
+
+  What are some reasonable replacement conditions? It seems we need "task-local" frequencies and
+  periods.
+
+  1. In the limit, task-local actual frequency approaches assigned task-local frequency. (Fairness)
+  2. Actual task-local period is always one of the integers closest to assigned task-local period.
+     (Task-local reasonableness)
+  3. Actual global period is always one of the integers closest to some fixed value. (Reasonableness)
+
+  It is condition 3 that forces us to not be completely task-local. Condition 3 prevents people from
+  having two chores on the same day (with reasonably more people than chores).
+
+  Conditions 2 and 3 together enforce something similar to the original condition 3.
+
+  Condition 3 does not supersede condition 2 -- somebody shouldn't have to do the same task many
+  times, then do another task many times, before coming back to the first one. It should be somewhat
+  evenly distributed between the tasks (accounting for their different frequencies).
+
+  Is this possible for the pathological example? Yes: Person A always performs task 1, very
+  occasionally performs task 2. Conditions 1 and 2 are certainly satisfied. Condition 3 is also
+  satisfied!
+
+  Enumerating and skipping definitely doesn't work -- imagine three tasks and people ABC. Tasks 1
+  and two have everybody. Task 2 has only AB. You get:
+
+  | A | B | A |
+  | B | C | A |
+
+  And condition 2 is violated in task 3: It should be ABAB.
+
+  We see pretty quickly that to satisfy condition 2, each column must simply be periodic. Is there a
+  periodic choice for each column that satisfies the other two properties as well? Condition 1 is
+  automatically satisfied. Unfortunately, condition 3 can't always be satisfied. Imagine two tasks,
+  task 1 is ABC, task 2 is AB. The global period of A and B is 6/5, but they will necessarily be
+  doing both tasks on the same day somehow.
+
+  These conditions were not in order. Can we relax condition 2 to get condition 3 back? For the
+  scenario counter-exampled in the table above, it seems so.
+
+  Eligibility check, then order by least to greatest task-local frequency. Eg:
+
+  | ABC | AB |
+  |-----+----|
+  | A   | B  |
+  | B   | A  |
+  | C   | B  |
+  | A   | B  |
+  | B   | A  |
+  | C   | A  |
+  | A   | B  |
+  | B   | A  |
+  | C   | B  |
+  | A   | B  |
+
+  There is a pattern -- ABCABC in the first column, BABBAA in the second.
+
+  Are the conditions still strong enough to guarantee nothing shitty? AABBCC vs BBAABA seems "worse"
+  than what's in the table above. Could get worse with a greater number of people: Eg, for a single
+  column, AAAAAABBBBBBAAAAAABBBBBB is valid. Could extend to any length. Could probably be posed as
+  a minimization problem.
+
+  Even with condition 2 relaxed, skipping isn't necessarily good:
+
+  | ABC | AB |
+  |-----+----|
+  | A   | B  |
+  | C   | A  |
+  | B   | A  |
+  | B   | A  |
+  | B   | A  |
+
+  et cetera.
+
+  TODO: LCM of number of people assigned to each task. Still not optimal, though:
+
+  
+  | ABC | AB |
+  |-----+----|
+  | B   | A  |
+  | C   | A  |
+  | B   | A  |
+  | A   | B  |
+  | C   | B  |
+  | A   | B  |
+
+  looks a bit uglier than the earlier one.
+
+  Is it always possible with exactly two tasks? Let the column with the greater number of tasks be
+  assigned periodically in enumeration order. In the column with the lesser number of tasks, also do
+  enumeration order.
+
+  Definition problem: Currently, doing two tasks in a day is the same as doing many tasks in a day
+  because $\Delta$ is zero regardless of exactly how many tasks there are. We could define tasks per
+  day, but then there's a cutoff when we stop talking about days per task and start talking about
+  tasks per day. Can we do something more natural?
+
+  Possibility: On days stretching back from the day the latest task was completed to the day the
+  last task was completed, count the total number of tasks completed minus one, and divide by the
+  number of days. When the tasks did not occur on the same day, it will just be 1/n where /n/ is the
+  spacing between the events, otherwise it will be /n/ where /n/ is the number of times the task was
+  performed on that day.
+* Experiments
+  #+BEGIN_SRC lisp
+    (defun wave-cycles (freq)
+      "If on cycle 0 the wave peak occurs at an integer, then cycle (wave-cycles freq) is the earliest
+    next wave peak that occurs at an integer."
+      (check-type freq rational)
+      (numerator freq))
+
+    (defun wave-peaks (freq)
+      (check-type freq rational)
+      (loop for i from 0 below (wave-cycles freq)
+            collect (* i (/ freq))))
+
+    (defun wave-peak-ones (freq &optional (offset 0) len)
+      (check-type freq rational)
+      (let* ((len (or len (denominator freq)))
+             (result (make-list len :initial-element 0)))
+        (loop for i from (mod offset (/ freq)) by (/ freq)
+              while (< i len)
+              do (incf (nth (floor i) result)))
+        result))
+
+    (defun vector-add (&rest vs)
+      (apply #'mapcar #'+ vs))
+  #+END_SRC
+* As a matrix rounding problem.
+  A t*n*d matrix, each item is the frequency that agent has to perform task. Goal is to round,
+  preserving sum along d axis (number of tasks), preserving sum along n axis (only 1 person should
+  do each task every day), and not necessarily preserving sum along t axis.
+
+  doesn't really work.
+* As maxflow
+  First, note that there are (hopefully) algorithms for solving maxflow with a) colored
+
+  For each day, create a node at the "beginning" of each chore and at the end.
+* The Solution!
+  The problem can be divided into two steps:
+** Which days people have tasks
+   The easiest way to do this is to create 0-1 waves for everybody based on their frequency. Set
+   fractional wave offsets so that each wave has the earliest unused starting point. If a wave peaks
+   multiple times in the same cell, increment it multiple times.
+
+   It's clear why this works when everybody has the same frequency: Imagine overlaying a whole bunch
+   of 3/8 frequency curves offset just right...you'll end up with something that peaks 3 times per
+   cell. Discretizing and adding should yield the same result.
+
+   When there are different frequencies, it seems there is usually a way to shift things around and
+   get it to work...but when you look at the actual waves, the peaks aren't evenly spaced, and it's
+   not possible to evenly space them. For example, in the real house scenario, where there's 22/56
+   frequency for most people, we eventually want a frequency of three tasks per day. That would mean
+   peaks located 1/3rd apart. But 1/3 does not divide 56/22, the period of the wave, so if one peak
+   is aligned, the next won't be. Conclusion: The whole idea of evenly spacing the peaks is bust.
+
+** Which task to perform on assigned days
+*** Controlled Rounding
+   Matrix rounding! Set up a matrix with one axis being the day, one axis being the task, and one
+   axis being the person. Fill each cell with the expected number of times that person should
+   perform that task on that day. More formally, let /w(a,d)/ be the wave function for that actor. Let
+   $A_t$ be the set of actors assigned to task /t/. Let $T_a$ be the set of tasks assigned to actor
+   /a/. Then a cell d,t,a should be filled out with
+
+   $$\frac{w(a,d)\cdot \frac{1}{|A_t|}}{\sum_{t'\in T_a} \frac{1}{|A_{t'}|}}$$
+
+   Then,
+   + Day-rows sum to the number of times given person must perform given task.
+   + People-rows sum to 1, the number of times a given task must be completed in a given day.
+   + Task-rows sum to /w(a,d)/, the number of tasks that person should perform on that day.
+
+   # However, the matrix rounding problem is traditionally just for two dimensions. It's possible to
+   # use a stronger version of the statement, from Uniform Matrix Rounding paper, to extend to three
+   # dimensions. We can fold a 3D matrix into a 2D matrix:
+
+   # |       | x1 | x2 | x3 | x4 |
+   # |-------+----+----+----+----|
+   # | y1,z1 |    |    |    |    |
+   # | y2,z1 |    |    |    |    |
+   # | y3,z1 |    |    |    |    |
+   # | y1,z2 |    |    |    |    |
+   # | y2,z2 |    |    |    |    |
+   # | ...   |    |    |    |    |
+   # | y3,z7 |    |    |    |    |
+
+   # Whole row sums vary x only.
+
+   # Partial column sums vary y only.
+
+   # Meh, this isn't going to work.
+
+   Alas, "controlled roundings" do not necessarily exist for three dimensional matrices (see Census
+   report). But our problem isn't totally general. There are a couple notable restrictions on the
+   matrices:
+   + All elements are between zero and one.
+   + The task-day-constant rows always have a sum of one.
+
+   To understand the difficult of solving 3D controlled roundings, focus on the solution to 2D
+   controlled roundings: Form an augmented network flow (with sources, demands, and minimum edge
+   flows). Every row is a source equal to the row sum, which goes to a node representing a matrix
+   elemnet, which then goes through an edge constrained by the rounding rule, which then goes into
+   the column sinks.
+
+   Trying to generalize this flow to 3D, you might have sinks for both columns and depth-rows. But
+   the node capacity can only go one way: To either the column sinks or the depth-row sinks. You
+   could try to double the capacity of the rounding edges in the graph, but then it has three values
+   to choose from instead of two. TODO: is this actually a fundamental problem? Or is the flow
+   simply not necessarily solvable? Apparently 3D controlled rounding is NP-complete.
+
+   Controlled rounding as defined in the census paper means replacing every item with 0 or a
+   constant b, rather than rounding to the nearest integer. Variations include rounding to a
+   multiple of b.
+
+   But let's consider our restrictions. The first restriction, that elements are between zero and
+   one, seems unlikely to be helpful since the census paper has the same restriction.
+   
+*** Flow
+    Once we know spacing, maybe we can try flow again? 
